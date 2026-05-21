@@ -706,14 +706,15 @@ def server_error(e):
 # ===========================
 
 if __name__ == '__main__':
+    port = int(os.getenv('PORT', 8080))
     print("\n" + "="*60)
     print("  FISH HUNTER - Anti-Phishing System")
     print("="*60)
-    print("  Server starting at http://localhost:5000")
-    print("  Search page: http://localhost:5000/search.html")
-    print("  Chat page: http://localhost:5000/chat.html")
-    print("  About phishing: http://localhost:5000/what-is-phishing.html")
-    print("  About service: http://localhost:5000/about.html")
-    print("  Phishing DB: http://localhost:5000/phishing.html")
+    print(f"  Server starting at http://localhost:{port}")
+    print(f"  Search page: http://localhost:{port}/search.html")
+    print(f"  Chat page: http://localhost:{port}/chat.html")
+    print(f"  About phishing: http://localhost:{port}/what-is-phishing.html")
+    print(f"  About service: http://localhost:{port}/about.html")
+    print(f"  Phishing DB: http://localhost:{port}/phishing.html")
     print("="*60 + "\n")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=port, debug=True)
