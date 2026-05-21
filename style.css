@@ -1,0 +1,14 @@
+.logo-img {
+  width: 350px;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .logo-img {
+    width: 180px;
+    height: 180px;
+  }
+}

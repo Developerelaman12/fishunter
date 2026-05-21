@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fish Hunter</title>
+<link rel="icon" type="image/jpg" href="./images/fish.png">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Exo 2', sans-serif; background: #0a0e1a; color: #fff; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(5,8,20,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px; font-weight: 700; letter-spacing: 3px;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 4px 14px;
+  }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: rgba(255,255,255,0.7);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+  }
+
+  .bg-screens {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px; padding: 6px;
+    opacity: 0.18;
+    filter: blur(1px);
+  }
+  .screen {
+    background: linear-gradient(135deg, #0d1b2e 0%, #0a1520 100%);
+    border: 1px solid rgba(100,180,255,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 8px; gap: 4px;
+  }
+  .screen-bar { height: 8px; background: rgba(100,180,255,0.3); border-radius: 2px; }
+  .screen-line { height: 4px; border-radius: 2px; }
+  .l1 { background: rgba(100,255,180,0.4); width: 80%; }
+  .l2 { background: rgba(100,180,255,0.3); width: 60%; }
+  .l3 { background: rgba(255,180,100,0.3); width: 70%; }
+  .l4 { background: rgba(100,255,180,0.2); width: 45%; }
+
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(5,8,20,0.95) 0%, rgba(5,8,20,0.7) 50%, rgba(5,8,20,0.5) 100%);
+  }
+
+  .hero-content {
+    position: relative; z-index: 10;
+    display: flex; align-items: center;
+    width: 100%; padding: 0 80px;
+    gap: 80px;
+  }
+
+  .logo-wrap {
+    flex-shrink: 0;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 40%, #1e7ecb 0%, #0f4b8c 45%, #062a52 80%, #03162e 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 60px rgba(30,126,203,0.3), 0 0 120px rgba(30,126,203,0.1);
+  }
+  .logo-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .logo-placeholder-box {
+    width: 140px; height: 140px;
+    border: 2px dashed rgba(255,255,255,0.35);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 12px; letter-spacing: 1px; text-align: center; line-height: 1.5;
+    font-family: 'Exo 2', sans-serif;
+  }
+  .logo-placeholder-text {
+    font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px;
+  }
+
+  .hero-text { flex: 1; }
+  .hero-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 700; line-height: 1.1;
+    margin-bottom: 24px;
+    color: #fff;
+  }
+  .hero-title span { display: block; }
+  .hero-desc {
+    font-size: 16px; font-weight: 300; line-height: 1.75;
+    color: rgba(255,255,255,0.65);
+    max-width: 520px; margin-bottom: 40px;
+  }
+
+  .btn-start {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 40px;
+    background: transparent;
+    border: 2px solid #06b6d4;
+    color: #06b6d4;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.25s, color 0.25s;
+    border-radius: 2px;
+  }
+  .btn-start:hover { background: #06b6d4; color: #0a0e1a; }
+  
+
+  .scroll-hint {
+    position: absolute; bottom: 36px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.35); font-size: 12px; letter-spacing: 2px;
+  }
+  .chevron {
+    width: 20px; height: 20px;
+    border-right: 2px solid rgba(255,255,255,0.35);
+    border-bottom: 2px solid rgba(255,255,255,0.35);
+    transform: rotate(45deg);
+    animation: bounce 1.6s infinite;
+  }
+  @keyframes bounce {
+    0%,100%{transform:rotate(45deg) translateY(0)}
+    50%{transform:rotate(45deg) translateY(5px)}
+  }
+
+  @media (max-width: 900px) {
+    .hero-content { gap: 48px; padding: 0 40px; }
+    .logo-wrap { width: 220px; height: 220px; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links {
+      display: none;
+      position: fixed;
+      top: 61px; left: 0; right: 0;
+      background: rgba(5,8,20,0.97);
+      backdrop-filter: blur(16px);
+      flex-direction: column;
+      gap: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 99;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li { border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .nav-links a { display: block; padding: 16px 24px; font-size: 13px; letter-spacing: 1px; }
+    .hamburger { display: flex; }
+
+    .hero-content {
+      flex-direction: column;
+      align-items: center;
+      padding: 0 24px;
+      gap: 36px;
+      text-align: center;
+      padding-top: 80px;
+    }
+    .logo-wrap { width: 180px; height: 180px; flex-shrink: 0; }
+    .hero-desc { margin-left: auto; margin-right: auto; }
+    .btn-start { margin: 0 auto; }
+  }
+
+  @media (max-width: 480px) {
+    .logo-wrap { width: 140px; height: 140px; }
+    .hero-content { padding: 0 16px; padding-top: 80px; }
+  }</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">FISH HUNTER</div>
+  <ul class="nav-links" id="navLinks">
+  <li><a href="about.html">Об сервисе</a></li>
+  <li><a href="chat.html">Чат с ИИ</a></li>
+  <li><a href="phishing.html">База фишинговых сайтов</a></li>
+  <li><a href="what-is-phishing.html">Что такое фишинг</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Меню">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<section class="hero">
+  <div class="bg-screens">
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div><div class="screen-line l2"></div><div class="screen-line l1"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div><div class="screen-line l2"></div><div class="screen-line l3"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l2"></div><div class="screen-line l4"></div><div class="screen-line l1"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l4"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l1"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div><div class="screen-line l2"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l3"></div><div class="screen-line l4"></div><div class="screen-line l2"></div><div class="screen-line l1"></div><div class="screen-line l3"></div><div class="screen-line l4"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div><div class="screen-line l1"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l2"></div><div class="screen-line l4"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l2"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div><div class="screen-line l2"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l4"></div><div class="screen-line l3"></div><div class="screen-line l2"></div><div class="screen-line l1"></div><div class="screen-line l4"></div><div class="screen-line l3"></div></div>
+    <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div><div class="screen-line l1"></div></div>
+  </div>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="logo-wrap">
+      <div class="logo-placeholder">
+        <img class="logo-img" src="./images/logo.jpg" alt="">
+      </div>
+    </div>
+
+    <div class="hero-text">
+      <h1 class="hero-title">
+        <span>Fish Hunter —</span>
+        <span>охотник на фишинг</span>
+      </h1>
+      <p class="hero-desc">
+       Fish Hunter использует передовые алгоритмы искусственного 
+интеллекта для мгновенного анализа веб-ресурсов. Система 
+выявляет фишинговые угрозы с высокой точностью, защищая 
+пользователей и бизнес от киберпреступников.
+      </p>
+      <a href="search.html" class="btn-start">
+        начать охоту
+        <i class="bi bi-arrow-right" style="font-size:18px;"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+  </div>
+</section>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    navLinks.classList.toggle('open');
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      navLinks.classList.remove('open');
+    });
+  });
+</script>
+</body>

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fish Hunter — Проверка сайта</title>
+<link rel="icon" type="image/jpg" href="./images/fish.png">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Exo 2', sans-serif; background: #0a0e1a; color: #fff; min-height: 100vh; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(5,8,20,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px; font-weight: 700; letter-spacing: 3px;
+    color: #fff; border: 2px solid #fff; padding: 4px 14px;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: rgba(255,255,255,0.7);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  .bg-screens {
+    position: fixed; inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px; padding: 6px;
+    opacity: 0.1; filter: blur(1px); z-index: 0;
+  }
+  .screen {
+    background: linear-gradient(135deg, #0d1b2e, #0a1520);
+    border: 1px solid rgba(100,180,255,0.2); border-radius: 3px;
+    display: flex; flex-direction: column; padding: 8px; gap: 4px;
+  }
+  .screen-bar { height: 8px; background: rgba(100,180,255,0.3); border-radius: 2px; }
+  .screen-line { height: 4px; border-radius: 2px; }
+  .l1 { background: rgba(100,255,180,0.4); width: 80%; }
+  .l2 { background: rgba(100,180,255,0.3); width: 60%; }
+  .l3 { background: rgba(255,180,100,0.3); width: 70%; }
+  .l4 { background: rgba(100,255,180,0.2); width: 45%; }
+  .bg-overlay {
+    position: fixed; inset: 0; z-index: 1;
+    background: linear-gradient(135deg, rgba(5,8,20,0.95) 0%, rgba(5,8,20,0.88) 100%);
+  }
+
+  main {
+    position: relative; z-index: 10;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 120px 24px 60px;
+  }
+
+  .page-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(32px, 5vw, 58px); font-weight: 700; line-height: 1.1;
+    text-align: center; margin-bottom: 16px;
+  }
+  .page-subtitle {
+    font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.5);
+    text-align: center; max-width: 480px; line-height: 1.7; margin-bottom: 52px;
+  }
+
+  .search-wrap {
+    width: 100%; max-width: 680px;
+    display: flex; gap: 0;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 4px; overflow: hidden;
+    background: rgba(255,255,255,0.03);
+    transition: border-color 0.25s;
+    margin-bottom: 16px;
+  }
+  .search-wrap:focus-within { border-color: rgba(6,182,212,0.6); }
+
+  .search-icon {
+    display: flex; align-items: center; padding: 0 18px;
+    color: rgba(255,255,255,0.3);
+  }
+  .search-icon i { font-size: 20px; }
+
+  .search-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 15px; font-weight: 300; color: #fff;
+    padding: 18px 0;
+  }
+  .search-input::placeholder { color: rgba(255,255,255,0.25); }
+
+  .search-btn {
+    background: #06b6d4; border: none; cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #0a0e1a;
+    padding: 0 32px; transition: background 0.2s; white-space: nowrap;
+  }
+  .search-btn:hover { background: #22d3ee; }
+  .search-btn:active { background: #d97706; }
+  .search-btn:disabled {
+    opacity: 0.6; cursor: not-allowed; background: #06b6d4;
+  }
+
+  .search-hint {
+    font-size: 12px; color: rgba(255,255,255,0.25);
+    text-align: center; letter-spacing: 0.5px;
+  }
+
+  /* LOADING OVERLAY */
+  .loading-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(5,8,20,0.92);
+    backdrop-filter: blur(8px);
+    flex-direction: column; align-items: center; justify-content: center;
+  }
+  .loading-overlay.active { display: flex; }
+
+  .loading-container {
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+    max-width: 500px; width: 100%; padding: 0 24px;
+  }
+
+  .loading-spinner {
+    position: relative; width: 80px; height: 80px;
+  }
+  .loading-spinner .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 3px solid transparent;
+    animation: spin 1.2s linear infinite;
+  }
+  .loading-spinner .ring:nth-child(1) {
+    border-top-color: #06b6d4;
+    animation-duration: 1.2s;
+  }
+  .loading-spinner .ring:nth-child(2) {
+    inset: 8px; border-right-color: rgba(6,182,212,0.6);
+    animation-duration: 0.9s; animation-direction: reverse;
+  }
+  .loading-spinner .ring:nth-child(3) {
+    inset: 16px; border-bottom-color: rgba(6,182,212,0.3);
+    animation-duration: 0.6s;
+  }
+  .loading-icon-center {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.6);
+  }
+  .loading-icon-center i { font-size: 24px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-steps {
+    width: 100%; display: flex; flex-direction: column; gap: 10px;
+  }
+  .loading-step {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; border-radius: 4px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px; color: rgba(255,255,255,0.3);
+    transition: all 0.35s ease;
+  }
+  .loading-step.active {
+    color: #fff; border-color: rgba(6,182,212,0.4);
+    background: rgba(6,182,212,0.06);
+  }
+  .loading-step.done {
+    color: rgba(16,185,129,0.9); border-color: rgba(16,185,129,0.2);
+    background: rgba(16,185,129,0.04);
+  }
+  .step-icon-svg {
+    width: 18px; height: 18px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-icon-svg { font-size: 18px; display: flex; align-items: center; }
+
+  .loading-progress {
+    width: 100%; height: 3px; background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden; margin-top: 4px;
+  }
+  .loading-progress-bar {
+    height: 100%; background: #06b6d4; border-radius: 2px;
+    width: 0%; transition: width 0.5s ease;
+  }
+  .loading-estimate {
+    font-size: 12px; color: rgba(255,255,255,0.25);
+    text-align: center; letter-spacing: 1px;
+  }
+
+  /* RESULT FULLSCREEN */
+  .result-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(5,8,20,0.94);
+    backdrop-filter: blur(12px);
+    overflow-y: auto; padding: 40px 20px;
+  }
+  .result-overlay.active { display: flex; justify-content: center; align-items: flex-start; }
+
+  .result-full-card {
+    width: 100%; max-width: 780px;
+    background: rgba(255,255,255,0.02);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 40px 36px;
+    margin-top: 20px;
+    animation: fadeInUp 0.5s ease;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex; align-items: center; gap: 20px; margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .result-big-icon {
+    width: 72px; height: 72px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .result-big-icon.safe { background: rgba(16,185,129,0.12); }
+  .result-big-icon.danger { background: rgba(239,68,68,0.12); }
+  .result-big-icon.warning { background: rgba(6,182,212,0.12); }
+  .result-big-icon svg { width: 34px; height: 34px; }
+
+  .result-title-block h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 36px; font-weight: 700; letter-spacing: 1px;
+    line-height: 1.1;
+  }
+  .result-title-block h2.safe { color: #10b981; }
+  .result-title-block h2.danger { color: #ef4444; }
+  .result-title-block h2.warning { color: #06b6d4; }
+  .result-title-block .big-url {
+    font-size: 14px; color: rgba(255,255,255,0.35); margin-top: 4px;
+    word-break: break-all;
+  }
+
+  .close-result {
+    margin-left: auto; background: none; border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; width: 40px; height: 40px; border-radius: 50%;
+    cursor: pointer; font-size: 18px; display: flex; align-items: center;
+    justify-content: center; transition: all 0.2s; flex-shrink: 0;
+  }
+  .close-result:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+  .close-result svg { width: 18px; height: 18px; }
+
+  .result-sections { display: grid; gap: 24px; }
+  .result-section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px; padding: 20px 24px;
+  }
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  }
+  .section-dot.green { background: #10b981; }
+  .section-dot.red { background: #ef4444; }
+  .section-dot.yellow { background: #06b6d4; }
+
+  .param-list { display: grid; gap: 10px; }
+  .param-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .param-label { color: rgba(255,255,255,0.5); }
+  .param-value { font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .param-value.good { color: #10b981; }
+  .param-value.bad { color: #ef4444; }
+  .param-value.warn { color: #06b6d4; }
+
+  .risk-meter {
+    margin-top: 12px; display: flex; align-items: center; gap: 12px;
+  }
+  .risk-bar-bg {
+    flex: 1; height: 8px; background: rgba(255,255,255,0.06);
+    border-radius: 4px; overflow: hidden;
+  }
+  .risk-bar-fill {
+    height: 100%; border-radius: 4px; transition: width 0.5s;
+  }
+  .risk-bar-fill.low { background: #10b981; }
+  .risk-bar-fill.medium { background: #06b6d4; }
+  .risk-bar-fill.high { background: #ef4444; }
+  .risk-percent {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px; font-weight: 700; min-width: 50px; text-align: right;
+  }
+
+  .risk-factors-list {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+  }
+  .risk-factor {
+    font-size: 12px; color: #ef4444; display: flex; align-items: center; gap: 8px;
+  }
+  .risk-factor::before {
+    content: "⚠️";
+    font-size: 12px;
+  }
+
+  .stats-row {
+    display: flex; gap: 0; margin-top: 52px;
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden;
+    width: 100%; max-width: 680px;
+  }
+  .stat {
+    flex: 1; padding: 20px; text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 28px; font-weight: 700; color: #06b6d4; margin-bottom: 4px;
+  }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px; text-transform: uppercase; }
+
+  .error-message {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: #ef4444;
+  }
+
+  .db-notice {
+    margin-top: 12px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    text-align: center;
+  }
+
+  .action-buttons { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  .btn {
+    padding: 12px 28px; border-radius: 4px; font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    text-decoration: none; cursor: pointer; transition: all 0.2s; text-align: center;
+    border: 1.5px solid;
+  }
+  .btn-primary { background: #06b6d4; border-color: #06b6d4; color: #0a0e1a; }
+  .btn-primary:hover { background: #22d3ee; }
+  .btn-outline { background: transparent; border-color: rgba(255,255,255,0.2); color: #fff; }
+  .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.04); }
+
+  @media (max-width: 600px) {
+    .result-full-card { padding: 24px 16px; }
+    .result-title-block h2 { font-size: 24px; }
+    .result-big-icon { width: 52px; height: 52px; }
+    .result-big-icon svg { width: 26px; height: 26px; }
+    .param-row { font-size: 12px; }
+  }
+
+
+  @media (max-width: 600px) {
+    main { padding: 90px 16px 40px; }
+    .search-wrap { flex-direction: column; border-radius: 8px; }
+    .search-icon { padding: 14px 18px 0; justify-content: flex-start; }
+    .search-input { padding: 10px 18px 14px; width: 100%; }
+    .search-btn { padding: 14px 18px; width: 100%; justify-content: center; font-size: 14px; letter-spacing: 1px; }
+    .stats-row { flex-wrap: wrap; }
+    .stat { flex: 1 1 30%; padding: 14px 8px; }
+    .stat-num { font-size: 20px; }
+    .stat-label { font-size: 9px; }
+    .result-full-card { padding: 20px 14px; margin-top: 10px; }
+    .result-header { gap: 12px; }
+    .result-title-block h2 { font-size: 22px; }
+    .result-big-icon { width: 52px; height: 52px; }
+    .result-big-icon svg { width: 26px; height: 26px; }
+    .param-row { font-size: 12px; }
+    .section-title { font-size: 13px; }
+    .action-buttons { flex-direction: column; }
+    .btn { text-align: center; padding: 12px 20px; }
+    .result-overlay { padding: 20px 10px; }
+    .loading-container { padding: 0 16px; }
+  }
+
+  /* ===== HAMBURGER MENU ===== */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px !important; }
+    .nav-links {
+      display: none;
+      position: fixed;
+      top: 61px; left: 0; right: 0;
+      background: rgba(5,8,20,0.97);
+      backdrop-filter: blur(16px);
+      flex-direction: column;
+      gap: 0 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 99;
+    }
+    .nav-links.open { display: flex !important; }
+    .nav-links li { border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .nav-links a { display: block; padding: 16px 24px !important; font-size: 13px !important; letter-spacing: 1px !important; }
+    .hamburger { display: flex; }
+    .container, .chat-container { padding: 0 16px; }
+    .card { padding: 20px 16px !important; }
+    .hero-section { margin-bottom: 32px !important; }
+    .stat-number { font-size: 30px !important; }
+    .features-grid, .types-grid { grid-template-columns: 1fr !important; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .steps { flex-direction: column; }
+    .step { min-width: unset !important; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="bg-screens">
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div><div class="screen-line l2"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l2"></div><div class="screen-line l4"></div><div class="screen-line l1"></div><div class="screen-line l3"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l4"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l3"></div><div class="screen-line l4"></div><div class="screen-line l2"></div><div class="screen-line l1"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l2"></div><div class="screen-line l4"></div><div class="screen-line l3"></div><div class="screen-line l1"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l3"></div><div class="screen-line l1"></div><div class="screen-line l4"></div><div class="screen-line l2"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l4"></div><div class="screen-line l3"></div><div class="screen-line l2"></div><div class="screen-line l1"></div></div>
+  <div class="screen"><div class="screen-bar"></div><div class="screen-line l1"></div><div class="screen-line l2"></div><div class="screen-line l3"></div><div class="screen-line l4"></div></div>
+</div>
+<div class="bg-overlay"></div>
+
+<nav>
+  <a class="nav-logo" href="index.html">FISH HUNTER</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="about.html">Об сервисе</a></li>
+    <li><a href="chat.html">Чат с ИИ</a></li>
+    <li><a href="phishing.html">База фишинговых сайтов</a></li>
+    <li><a href="what-is-phishing.html">Что такое фишинг</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Меню"><span></span><span></span><span></span></button>
+</nav>
+
+<main>
+  <h1 class="page-title">Проверка сайта<br>на фишинг</h1>
+  <p class="page-subtitle">Введите URL-адрес сайта — искусственный интеллект проверит его за секунды и выдаст точный результат.</p>
+
+  <div class="search-wrap">
+    <div class="search-icon">
+      <i class="bi bi-search" style="font-size:20px;"></i>
+    </div>
+    <input class="search-input" id="urlInput" type="text" placeholder="https://example.com" />
+    <button class="search-btn" id="searchBtn" onclick="checkSite()">Проверить</button>
+  </div>
+  <p class="search-hint">Например: https://google.com &nbsp;·&nbsp; https://paypal.com</p>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num" id="statsTotal">-</div><div class="stat-label">Сайтов проверено</div></div>
+    <div class="stat"><div class="stat-num">99%</div><div class="stat-label">Точность</div></div>
+    <div class="stat"><div class="stat-num">~5с</div><div class="stat-label">Время анализа</div></div>
+  </div>
+  <div class="db-notice" id="dbNotice"></div>
+</main>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-container">
+    <div class="loading-spinner">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="loading-icon-center">
+        <i class="bi bi-shield-shaded" style="font-size:24px;"></i>
+      </div>
+    </div>
+
+    <div class="loading-steps">
+      <div class="loading-step" id="step1">
+        <span class="step-icon-svg"><i class="bi bi-shield-check"></i></span>
+        Проверка SSL-сертификата
+      </div>
+      <div class="loading-step" id="step2">
+        <span class="step-icon-svg"><i class="bi bi-globe"></i></span>
+        Анализ домена и whois
+      </div>
+      <div class="loading-step" id="step3">
+        <span class="step-icon-svg"><i class="bi bi-bug-fill"></i></span>
+        Сканирование на фишинг-паттерны
+      </div>
+      <div class="loading-step" id="step4">
+        <span class="step-icon-svg"><i class="bi bi-list-check"></i></span>
+        Проверка в чёрных списках
+      </div>
+      <div class="loading-step" id="step5">
+        <span class="step-icon-svg"><i class="bi bi-robot"></i></span>
+        Финальный анализ ИИ
+      </div>
+    </div>
+
+    <div class="loading-progress">
+      <div class="loading-progress-bar" id="progressBar"></div>
+    </div>
+    <p class="loading-estimate" id="loadingEstimate">Подготовка анализа...</p>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-full-card" id="resultFullCard"></div>
+</div>
+
+<script>
+// SVG icons
+const spinnerSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32">
+    <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite"/>
+  </circle>
+</svg>`;
+
+const checkSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="20 6 9 17 4 12"/>
+</svg>`;
+
+const circleSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <circle cx="12" cy="12" r="10"/>
+</svg>`;
+
+async function loadStats() {
+  try {
+    const response = await fetch('/api/stats');
+    const data = await response.json();
+    if (data.success && data.stats) {
+      const total = data.stats.total_checks || 0;
+      const statsEl = document.getElementById('statsTotal');
+      if (statsEl) {
+        if (total < 1000) {
+          statsEl.textContent = total;
+        } else if (total < 1000000) {
+          statsEl.textContent = Math.floor(total / 1000) + '.' + (Math.floor((total % 1000) / 100)) + 'K';
+        } else {
+          statsEl.textContent = (total / 1000000).toFixed(1) + 'M';
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load stats:', e);
+  }
+}
+
+function checkSite() {
+  const input = document.getElementById('urlInput');
+  let url = input.value.trim();
+  if (!url) { 
+    input.focus(); 
+    return; 
+  }
+  
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const searchBtn = document.getElementById('searchBtn');
+  const progressBar = document.getElementById('progressBar');
+  const loadingEstimate = document.getElementById('loadingEstimate');
+
+  // Reset steps
+  document.querySelectorAll('.loading-step .step-icon-svg').forEach(el => {
+    el.innerHTML = circleSVG;
+  });
+  document.querySelectorAll('.loading-step').forEach(el => {
+    el.classList.remove('active', 'done');
+  });
+
+  loadingOverlay.classList.add('active');
+  searchBtn.disabled = true;
+  progressBar.style.width = '0%';
+  loadingEstimate.textContent = 'Подготовка анализа...';
+
+  const steps = ['step1','step2','step3','step4','step5'];
+  const stepTimes = [400, 900, 1500, 2100, 2700];
+  const progressValues = [15, 35, 55, 75, 92];
+  const stepLabels = [
+    'Проверка SSL-сертификата...',
+    'Анализ whois-данных...',
+    'Сканирование паттернов...',
+    'Проверка чёрных списков...',
+    'Финальный анализ ИИ...'
+  ];
+
+  steps.forEach((stepId, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(stepId);
+      if (!el) return;
+      const iconEl = el.querySelector('.step-icon-svg');
+      
+      if (i > 0) {
+        const prev = document.getElementById(steps[i-1]);
+        if (prev) {
+          const prevIcon = prev.querySelector('.step-icon-svg');
+          prev.classList.remove('active');
+          prev.classList.add('done');
+          if (prevIcon) prevIcon.innerHTML = checkSVG;
+        }
+      }
+      
+      el.classList.add('active');
+      if (iconEl) iconEl.innerHTML = spinnerSVG;
+      progressBar.style.width = progressValues[i] + '%';
+      loadingEstimate.textContent = stepLabels[i];
+    }, stepTimes[i]);
+  });
+
+  fetch('/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: url })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Mark all steps done
+    document.querySelectorAll('.loading-step .step-icon-svg').forEach(el => {
+      el.innerHTML = checkSVG;
+    });
+    document.querySelectorAll('.loading-step').forEach(el => {
+      el.classList.remove('active');
+      el.classList.add('done');
+    });
+    progressBar.style.width = '100%';
+    loadingEstimate.textContent = 'Анализ завершён';
+
+    setTimeout(() => {
+      loadingOverlay.classList.remove('active');
+      
+      if (data.success === false) {
+        showError(data.error || 'Ошибка при проверке URL');
+      } else {
+        showResult(data);
+        loadStats();
+        
+        if (data.is_phishing) {
+          const notice = document.getElementById('dbNotice');
+          if (notice) {
+            notice.innerHTML = '⚠️ Сайт добавлен в базу фишинговых сайтов';
+            notice.style.color = '#ef4444';
+            setTimeout(() => {
+              notice.innerHTML = '';
+            }, 5000);
+          }
+        }
+      }
+      
+      searchBtn.disabled = false;
+    }, 500);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    loadingOverlay.classList.remove('active');
+    showError('Ошибка соединения с сервером');
+    searchBtn.disabled = false;
+  });
+}
+
+function showError(errorMessage) {
+  const overlay = document.getElementById('resultOverlay');
+  const card = document.getElementById('resultFullCard');
+  
+  card.innerHTML = `
+    <div class="result-header">
+      <div class="result-big-icon danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="result-title-block">
+        <h2 class="danger">Ошибка</h2>
+      </div>
+      <button class="close-result" onclick="closeResult()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="error-message">
+      <p>${escapeHtml(errorMessage)}</p>
+      <p style="margin-top:12px; font-size:12px;">Пожалуйста, проверьте URL и попробуйте снова.</p>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="closeResult()">Закрыть</button>
+    </div>
+  `;
+  
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function showResult(data) {
+  const overlay = document.getElementById('resultOverlay');
+  const card = document.getElementById('resultFullCard');
+  
+  const displayUrl = data.url.length > 60 ? data.url.slice(0, 60) + '...' : data.url;
+  const riskPercent = data.risk_score || 0;
+  const riskClass = riskPercent < 25 ? 'low' : riskPercent < 60 ? 'medium' : 'high';
+  const riskColor = riskPercent < 25 ? '#10b981' : riskPercent < 60 ? '#06b6d4' : '#ef4444';
+  
+  const details = data.details || {};
+  const basic = details.basic || {};
+  const ssl = details.ssl || {};
+  const whois = details.whois || {};
+  const html = details.html || {};
+  const typo = details.typosquatting || {};
+  
+  const sslStatus = ssl.has_ssl ? 'Действителен' : 'Отсутствует';
+  const sslClass = ssl.has_ssl ? 'good' : 'bad';
+  
+  const domainAge = whois.domain_age_days;
+  let ageText = 'Неизвестно';
+  let ageClass = 'warn';
+  if (domainAge) {
+    if (domainAge < 30) {
+      ageText = `${domainAge} дней (новый)`;
+      ageClass = 'bad';
+    } else if (domainAge < 365) {
+      ageText = `${domainAge} дней`;
+      ageClass = 'warn';
+    } else {
+      ageText = `${Math.floor(domainAge / 365)} лет`;
+      ageClass = 'good';
+    }
+  }
+  
+  const riskFactors = data.risk_factors || [];
+  const riskFactorsHtml = riskFactors.length > 0 
+    ? `<div class="risk-factors-list">${riskFactors.slice(0, 5).map(f => `<div class="risk-factor">${escapeHtml(f)}</div>`).join('')}</div>`
+    : '<p style="font-size:12px; color:#10b981;">✓ Значимых угроз не обнаружено</p>';
+  
+  const viewInDbButton = data.is_phishing ? `
+    <a href="phishing.html" class="btn btn-outline" style="text-decoration:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      </svg>
+      В базу фишинга
+    </a>
+  ` : '';
+  
+  const htmlContent = `
+    <div class="result-header">
+      <div class="result-big-icon ${data.verdict_color}">
+        ${data.verdict === 'ФИШИНГ' ? `
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>` : data.verdict === 'ПОДОЗРИТЕЛЬНО' ? `
+        <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>` : `
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>`}
+      </div>
+      <div class="result-title-block">
+        <h2 class="${data.verdict_color}">${data.verdict_text}</h2>
+        <div class="big-url">${escapeHtml(displayUrl)}</div>
+      </div>
+      <button class="close-result" onclick="closeResult()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="result-sections">
+      <div class="result-section">
+        <div class="section-title"><span class="section-dot ${riskClass === 'low' ? 'green' : riskClass === 'medium' ? 'yellow' : 'red'}"></span> Уровень угрозы</div>
+        <div class="risk-meter">
+          <div class="risk-bar-bg">
+            <div class="risk-bar-fill ${riskClass}" style="width:${riskPercent}%"></div>
+          </div>
+          <span class="risk-percent" style="color:${riskColor}">${riskPercent}%</span>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="section-title"><span class="section-dot green"></span> Технические параметры</div>
+        <div class="param-list">
+          <div class="param-row">
+            <span class="param-label">SSL-сертификат</span>
+            <span class="param-value ${sslClass}">${sslStatus}</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">Возраст домена</span>
+            <span class="param-value ${ageClass}">${ageText}</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">IP-адрес</span>
+            <span class="param-value">${escapeHtml(basic.ip || 'н/д')}</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">HTTP статус</span>
+            <span class="param-value">${basic.status_code || 'н/д'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="section-title"><span class="section-dot red"></span> Индикаторы фишинга</div>
+        <div class="param-list">
+          <div class="param-row">
+            <span class="param-label">Форма входа</span>
+            <span class="param-value ${html.has_login_form ? 'warn' : 'good'}">${html.has_login_form ? 'Обнаружена' : 'Не обнаружена'}</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">Формы с паролем</span>
+            <span class="param-value ${html.password_forms > 0 ? 'bad' : 'good'}">${html.password_forms || 0}</span>
+          </div>
+          ${typo.is_typosquat ? `<div class="param-row"><span class="param-label">Typosquatting</span><span class="param-value bad">Имитирует: ${escapeHtml(typo.impersonated_brand)}</span></div>` : ''}
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="section-title"><span class="section-dot red"></span> Факторы риска</div>
+        ${riskFactorsHtml}
+      </div>
+
+      ${data.explanation ? `
+      <div class="result-section">
+        <div class="section-title"><span class="section-dot green"></span> Анализ AI</div>
+        <p style="font-size:14px; line-height:1.6; color:rgba(255,255,255,0.7);">${escapeHtml(data.explanation)}</p>
+        ${data.recommendation ? `<p style="font-size:13px; margin-top:12px; padding:10px; background:rgba(6,182,212,0.1); border-radius:6px;">💡 ${escapeHtml(data.recommendation)}</p>` : ''}
+      </div>
+      ` : ''}
+
+      <div class="action-buttons">
+        <button class="btn btn-outline" onclick="closeResult()">Новая проверка</button>
+        ${viewInDbButton}
+        <button class="btn btn-primary" onclick="closeResult()">${data.is_phishing ? 'Покинуть сайт' : 'Понятно'}</button>
+      </div>
+    </div>
+  `;
+
+  card.innerHTML = htmlContent;
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  document.getElementById('urlInput').value = '';
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+document.getElementById('urlInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') checkSite();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeResult();
+});
+
+document.getElementById('resultOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeResult();
+});
+
+loadStats();
+</script>
+<script>
+  (function() {
+    var btn = document.getElementById('hamburger');
+    var menu = document.getElementById('navLinks');
+    if (!btn || !menu) return;
+    btn.addEventListener('click', function() {
+      btn.classList.toggle('open');
+      menu.classList.toggle('open');
+    });
+    menu.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        btn.classList.remove('open');
+        menu.classList.remove('open');
+      });
+    });
+  })();
+</script>
+</body>
+</html>
